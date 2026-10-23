@@ -1,5 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { createThread, listThreads } from "@/lib/chat.functions";
+import { ChatLoadError } from "@/components/chat-load-error";
 
 export const Route = createFileRoute("/_authenticated/chat/")({
   head: () => ({
@@ -17,4 +18,5 @@ export const Route = createFileRoute("/_authenticated/chat/")({
     const id = threads[0]?.id ?? (await createThread()).id;
     throw redirect({ to: "/chat/$threadId", params: { threadId: id }, replace: true });
   },
+  errorComponent: ChatLoadError,
 });

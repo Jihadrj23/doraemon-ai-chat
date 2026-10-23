@@ -12,3 +12,4 @@
 - Chat streams via `src/routes/api/chat.ts` (verifies bearer token, persists UIMessage parts per thread); thread reads/writes go through `src/lib/chat.functions.ts` with `requireSupabaseAuth`. Why: keeps model calls server-side and data scoped to the signed-in user.
 - Brand avatars use the body illustration while decorative watermarks use the separate face asset. Why: preserves distinct branding and background roles.
 - Voice readouts use browser speech synthesis on explicit clicks, with one active utterance per chat and cancellation on navigation. Why: avoids sending conversation text to an additional service and prevents overlapping audio.
+- Both chat entry and thread routes use a shared retryable load-error view. Why: failed network reads must not leave a blank chat or silently appear as an empty conversation.

@@ -22,6 +22,7 @@ import {
 import face from "@/assets/doraemon-face.png";
 import body from "@/assets/doraemon-body.png";
 import { Button } from "@/components/ui/button";
+import { ChatLoadError } from "@/components/chat-load-error";
 import { useVoiceReadout } from "@/hooks/use-voice-readout";
 import { supabase } from "@/integrations/supabase/client";
 import { createThread, deleteThread, getThreadMessages, listThreads } from "@/lib/chat.functions";
@@ -60,6 +61,7 @@ export const Route = createFileRoute("/_authenticated/chat/$threadId")({
   }),
   loader: ({ params }) => getThreadMessages({ data: { id: params.threadId } }),
   component: ChatPage,
+  errorComponent: ChatLoadError,
 });
 
 const SUGGESTIONS = [

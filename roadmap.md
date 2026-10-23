@@ -1,4 +1,6 @@
 # Doraemon refinement
+- [ ] Fix chronological alternating turns and prevent simultaneous user submissions.
+- [ ] Simplify composer to one clean row with attachment, text, microphone and send; verify two turns and saved reload.
 - [x] Verified tooltip crash is absent; chat entry and thread request failures now show a recovery screen, and retry restores saved chats.
 - [x] Replace brand avatars with full-body illustration; retain face watermark.
 - [x] Simplify header to right hamburger and right drawer with New Chat, Chat History and JIHAD profile.

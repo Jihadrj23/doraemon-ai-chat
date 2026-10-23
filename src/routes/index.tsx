@@ -37,7 +37,7 @@ function Index() {
         alt="Doraemon"
         width={1024}
         height={1024}
-        className="relative size-40 rounded-lg object-contain shadow-2xl"
+        className="relative size-40 object-contain"
       />
       <h1 className="relative mt-6 font-display text-5xl font-bold tracking-tight">Doraemon</h1>
       <p className="relative mt-3 max-w-sm text-muted-foreground">

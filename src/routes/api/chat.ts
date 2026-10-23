@@ -1,11 +1,31 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
-import { convertToModelMessages, type UIMessage } from "ai";
+import { createUIMessageStream, createUIMessageStreamResponse, type UIMessage } from "ai";
 import type { Database } from "@/integrations/supabase/types";
-import { createResponsesCall } from "@/lib/ai/responses";
-import { withLovableAiGatewayRunIdHeader } from "@/lib/ai/run-id";
 
-const SYSTEM = `You are Doraemon, the friendly robot cat from the 22nd century. You are warm, playful, encouraging and genuinely helpful. Occasionally (not every message) reference a fitting gadget from your 4D pocket in a fun way, but always give clear, accurate, practical answers. Use markdown for structure when useful.`;
+export const BACKEND_URL = "https://doraemon-backend-ar3j.onrender.com";
+
+async function askBackend(message: string): Promise<string> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+    const data = (await res.json().catch(() => null)) as Record<string, unknown> | string | null;
+    if (!res.ok) {
+      console.error("backend error", res.status, data);
+      return "Doraemon's backend had a problem answering. Please try again in a moment.";
+    }
+    if (typeof data === "string") return data;
+    const v = data?.['reply'] ?? data?.['response'] ?? data?.['answer'] ?? data?.['message'] ?? data?.['text'];
+    return typeof v === "string" && v.trim() ? v : JSON.stringify(data);
+  } catch (e) {
+    console.error("backend unreachable", e);
+    return "Couldn't reach Doraemon's backend. Please try again.";
+  }
+}
+
 
 function userClient(token: string) {
   const url = process.env['SUPABASE_URL']!;
@@ -56,20 +76,16 @@ export const Route = createFileRoute("/api/chat")({
           await sb.from("threads").update(patch).eq("id", threadId);
         }
 
-        const apiKey = process.env['LOVABLE_API_KEY'];
-        if (!apiKey) return new Response("AI not configured", { status: 500 });
-
-        const { result, runIdFetch } = createResponsesCall(
-          request,
-          { baseURL: "https://ai.gateway.lovable.dev/v1", apiKey, model: "openai/gpt-6-astra" },
-          await convertToModelMessages(messages),
-          SYSTEM,
-        );
-
-        const response = result.toUIMessageStreamResponse({
+        const reply = await askBackend(textOf(last ?? { parts: [] } as unknown as UIMessage));
+        const stream = createUIMessageStream({
           originalMessages: messages,
-          generateMessageId: () => crypto.randomUUID(),
-          sendReasoning: true,
+          generateId: () => crypto.randomUUID(),
+          execute: ({ writer }) => {
+            const id = crypto.randomUUID();
+            writer.write({ type: "text-start", id });
+            writer.write({ type: "text-delta", id, delta: reply });
+            writer.write({ type: "text-end", id });
+          },
           onFinish: async ({ responseMessage }) => {
             const { error } = await sb.from("messages").upsert(
               {
@@ -82,14 +98,8 @@ export const Route = createFileRoute("/api/chat")({
             );
             if (error) console.error("save assistant msg", error);
           },
-          onError: (err) => {
-            const status = (err as { statusCode?: number })?.statusCode;
-            if (status === 429) return "Doraemon is a bit busy — please try again in a moment.";
-            if (status === 402) return "AI credits are used up. Please add credits to keep chatting.";
-            return "Something went wrong. Please try again.";
-          },
         });
-        return withLovableAiGatewayRunIdHeader(response, runIdFetch);
+        return createUIMessageStreamResponse({ stream });
       },
     },
   },

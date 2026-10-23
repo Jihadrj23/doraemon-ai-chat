@@ -47,6 +47,7 @@ import {
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { createChatTurnGate } from "@/lib/chat-turn";
 
 export const Route = createFileRoute("/_authenticated/chat/$threadId")({
   head: () => ({
@@ -284,37 +285,31 @@ function ChatWindow({
   });
 
   const { speakingId, read } = useVoiceReadout();
-  const latestReply = [...messages]
-    .reverse()
-    .find(
-      (message) =>
-        message.role === "assistant" &&
-        message.parts.some((part) => part.type === "text" && part.text.trim()),
-    );
-  const latestReplyText =
-    latestReply?.parts
-      .filter((part) => part.type === "text")
-      .map((part) => part.text)
-      .join("\n") ?? "";
-
   const busy = status === "submitted" || status === "streaming";
+  const turnGate = useRef(createChatTurnGate());
 
   function handleSubmit(msg: PromptInputMessage) {
-    if (busy) return;
     const text = msg.text.trim();
-    if (!text && msg.files.length === 0) return;
-    sendMessage({ text, files: msg.files });
+    if ((!text && msg.files.length === 0) || !turnGate.current.acquire(status)) {
+      throw new Error("A turn is already in progress or the message is empty.");
+    }
+    void sendMessage({ text, files: msg.files }).finally(() => turnGate.current.release());
   }
 
   return (
     <PromptInputProvider>
-      <Conversation className="relative z-0 flex-1">
-        <ConversationContent className="mx-auto w-full max-w-3xl gap-5 px-4 pt-6 pb-40">
+      <Conversation className="relative z-0 min-h-0 flex-1">
+        <ConversationContent className="mx-auto w-full max-w-3xl flex-col gap-5 px-4 pt-6 pb-28">
           {messages.length === 0 ? (
-            <EmptyState onPick={(t) => sendMessage({ text: t })} />
+            <EmptyState onPick={(text) => handleSubmit({ text, files: [] })} />
           ) : (
             messages.map((m) => (
-              <Message from={m.role} key={m.id}>
+              <Message
+                from={m.role}
+                key={m.id}
+                data-message-role={m.role}
+                className={cn("shrink-0", m.role === "user" ? "items-end" : "mr-auto items-start")}
+              >
                 {m.role === "assistant" && (
                   <div className="flex items-center gap-2 text-xs font-semibold text-primary">
                     <img
@@ -401,7 +396,7 @@ function ChatWindow({
             </div>
           )}
         </ConversationContent>
-        <ConversationScrollButton className="bottom-32" />
+        <ConversationScrollButton className="bottom-24" />
       </Conversation>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
@@ -410,37 +405,24 @@ function ChatWindow({
             onSubmit={handleSubmit}
             accept="image/*"
             multiple
-            className="glass-strong rounded-[1.75rem] shadow-2xl [&_[data-slot=input-group]]:rounded-[1.75rem] [&_[data-slot=input-group]]:border-glass-border [&_[data-slot=input-group]]:bg-transparent"
+            className="glass-strong relative rounded-[1.75rem] shadow-2xl [&_[data-slot=input-group]]:min-h-14 [&_[data-slot=input-group]]:rounded-[1.75rem] [&_[data-slot=input-group]]:border-glass-border [&_[data-slot=input-group]]:bg-transparent"
           >
             <PromptInputTextarea
               placeholder="Ask Doraemon anything..."
               autoFocus
-              className="min-h-12 px-4 pt-3.5 text-[15px] placeholder:text-muted-foreground"
+              aria-label="Message Doraemon"
+              className="min-h-14 max-h-36 py-4 pr-24 pl-12 text-sm placeholder:text-muted-foreground"
             />
-            <PromptInputFooter className="px-2 pb-2">
-              <PromptInputTools>
+            <PromptInputFooter className="pointer-events-none absolute inset-x-0 bottom-0 h-14 items-center px-2 py-2">
+              <PromptInputTools className="pointer-events-auto">
                 <AttachButton />
               </PromptInputTools>
-              <div className="flex items-center gap-1.5">
-                {latestReply && (
-                  <PromptInputButton
-                    tooltip={
-                      speakingId === latestReply.id ? "Stop readout" : "Read latest reply aloud"
-                    }
-                    aria-label={
-                      speakingId === latestReply.id ? "Stop readout" : "Read latest reply aloud"
-                    }
-                    disabled={busy}
-                    onClick={() => read(latestReply.id, latestReplyText)}
-                    className="size-10 rounded-full text-muted-foreground"
-                  >
-                    {speakingId === latestReply.id ? <Square /> : <Volume2 />}
-                  </PromptInputButton>
-                )}
+              <div className="pointer-events-auto flex items-center gap-1">
                 <VoiceButton />
                 <PromptInputSubmit
                   status={status}
                   onStop={stop}
+                  title={busy ? "Stop response" : "Send message"}
                   className="bg-send size-10 rounded-full text-primary-foreground hover:opacity-90"
                 >
                   {busy ? undefined : <ArrowUp className="size-5" />}

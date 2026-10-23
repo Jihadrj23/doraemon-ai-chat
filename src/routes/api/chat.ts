@@ -18,7 +18,7 @@ async function askBackend(message: string): Promise<string> {
       return "Doraemon's backend had a problem answering. Please try again in a moment.";
     }
     if (typeof data === "string") return data;
-    const v = data?.reply ?? data?.response ?? data?.answer ?? data?.message ?? data?.text;
+    const v = data?.['reply'] ?? data?.['response'] ?? data?.['answer'] ?? data?.['message'] ?? data?.['text'];
     return typeof v === "string" && v.trim() ? v : JSON.stringify(data);
   } catch (e) {
     console.error("backend unreachable", e);

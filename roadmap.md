@@ -1,5 +1,5 @@
 # Doraemon refinement
-- [ ] Verify tooltip crash is absent and add recoverable chat loading when requests fail.
+- [x] Verified tooltip crash is absent; chat entry and thread request failures now show a recovery screen, and retry restores saved chats.
 - [x] Replace brand avatars with full-body illustration; retain face watermark.
 - [x] Simplify header to right hamburger and right drawer with New Chat, Chat History and JIHAD profile.
 - [x] Remove Lovable login; retain Google and email/password.

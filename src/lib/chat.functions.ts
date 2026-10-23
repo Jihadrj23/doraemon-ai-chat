@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { UIMessage } from "ai";
 
 export const listThreads = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -39,7 +38,7 @@ export const getThreadMessages = createServerFn({ method: "GET" })
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ context, data }) => {
     const { data: thread } = await context.supabase.from("threads").select("id").eq("id", data.id).maybeSingle();
-    if (!thread) return { found: false, messages: [] as UIMessage[] };
+    if (!thread) return { found: false, messages: "[]" };
     const { data: rows, error } = await context.supabase
       .from("messages")
       .select("message_id,role,parts")
@@ -48,8 +47,8 @@ export const getThreadMessages = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     const messages = (rows ?? []).map((r) => ({
       id: r.message_id,
-      role: r.role as UIMessage["role"],
-      parts: r.parts as UIMessage["parts"],
+      role: r.role,
+      parts: r.parts,
     }));
-    return { found: true, messages: JSON.parse(JSON.stringify(messages)) as never as UIMessage[] };
+    return { found: true, messages: JSON.stringify(messages) };
   });

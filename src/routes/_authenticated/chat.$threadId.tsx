@@ -172,7 +172,7 @@ function ChatPage() {
         </SheetContent>
       </Sheet>
 
-      {initial.found && <ChatWindow key={threadId} threadId={threadId} initialMessages={initial.messages as UIMessage[]} />}
+      {initial.found && <ChatWindow key={threadId} threadId={threadId} initialMessages={JSON.parse(initial.messages) as UIMessage[]} />}
     </div>
   );
 }
@@ -356,7 +356,7 @@ function VoiceButton() {
     baseRef.current = textInput.value ? textInput.value + " " : "";
     rec.onresult = (e) => {
       let t = "";
-      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      for (let i = 0; i < e.results.length; i++) t += e.results[i]?.[0]?.transcript ?? "";
       textInput.setInput(baseRef.current + t);
     };
     rec.onend = () => setListening(false);

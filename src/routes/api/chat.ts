@@ -8,8 +8,8 @@ import { withLovableAiGatewayRunIdHeader } from "@/lib/ai/run-id";
 const SYSTEM = `You are Doraemon, the friendly robot cat from the 22nd century. You are warm, playful, encouraging and genuinely helpful. Occasionally (not every message) reference a fitting gadget from your 4D pocket in a fun way, but always give clear, accurate, practical answers. Use markdown for structure when useful.`;
 
 function userClient(token: string) {
-  const url = process.env.SUPABASE_URL!;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
+  const url = process.env['SUPABASE_URL']!;
+  const key = process.env['SUPABASE_PUBLISHABLE_KEY']!;
   return createClient<Database>(url, key, {
     auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
     global: {
@@ -56,7 +56,7 @@ export const Route = createFileRoute("/api/chat")({
           await sb.from("threads").update(patch).eq("id", threadId);
         }
 
-        const apiKey = process.env.LOVABLE_API_KEY;
+        const apiKey = process.env['LOVABLE_API_KEY'];
         if (!apiKey) return new Response("AI not configured", { status: 500 });
 
         const { result, runIdFetch } = createResponsesCall(

@@ -13,6 +13,8 @@ export function ChatLoadError({ reset }: ErrorComponentProps) {
     try {
       await router.invalidate();
       reset();
+    } catch {
+      // Keep the recovery view visible if the connection is still unavailable.
     } finally {
       setRetrying(false);
     }

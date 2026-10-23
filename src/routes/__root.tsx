@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 function NotFoundComponent() {
   return (
@@ -45,8 +46,12 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">This page didn't load</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Something went wrong. Try again or head home.</p>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          This page didn't load
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Something went wrong. Try again or head home.
+        </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -57,7 +62,10 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
           >
             Try again
           </button>
-          <a href="/" className="glass inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium">
+          <a
+            href="/"
+            className="glass inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium"
+          >
             Go home
           </a>
         </div>
@@ -72,7 +80,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "Doraemon — AI Chat" },
-      { name: "description", content: "Chat with Doraemon, your friendly AI companion from the 22nd century." },
+      {
+        name: "description",
+        content: "Chat with Doraemon, your friendly AI companion from the 22nd century.",
+      },
       { property: "og:title", content: "Doraemon — AI Chat" },
       { property: "og:description", content: "Chat with Doraemon, your friendly AI companion." },
       { property: "og:type", content: "website" },
@@ -124,8 +135,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <Toaster />
+      <TooltipProvider>
+        <Outlet />
+        <Toaster />
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }

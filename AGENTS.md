@@ -13,3 +13,4 @@
 - Brand avatars use the body illustration while decorative watermarks use the separate face asset. Why: preserves distinct branding and background roles.
 - Voice readouts use browser speech synthesis on explicit clicks, with one active utterance per chat and cancellation on navigation. Why: avoids sending conversation text to an additional service and prevents overlapping audio.
 - Both chat entry and thread routes use a shared retryable load-error view. Why: failed network reads must not leave a blank chat or silently appear as an empty conversation.
+- All chat submissions share a synchronous turn gate and transcript rows do not shrink. Why: rapid sends cannot open overlapping turns and long conversations retain chronological, non-overlapping rows.

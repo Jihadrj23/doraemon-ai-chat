@@ -62,19 +62,34 @@ function AuthPage() {
   }
 
   async function oauth() {
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/auth" });
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/auth",
+    });
     if (result.error) toast.error(String((result.error as Error).message ?? result.error));
   }
 
   return (
     <main className="relative flex min-h-dvh items-center justify-center overflow-hidden px-5">
-      <img src={face} alt="" aria-hidden className="watermark pointer-events-none absolute w-[130vmin] max-w-none" />
+      <img
+        src={face}
+        alt=""
+        aria-hidden
+        className="watermark pointer-events-none absolute w-[130vmin] max-w-none"
+      />
       <div className="glass-strong relative w-full max-w-sm rounded-3xl p-7">
         <div className="flex flex-col items-center text-center">
-          <img src={body} alt="Doraemon" width={1024} height={1024} className="size-24 rounded-lg object-contain" />
+          <img
+            src={body}
+            alt="Doraemon"
+            width={1024}
+            height={1024}
+            className="size-24 rounded-lg object-contain"
+          />
           <h1 className="mt-3 font-display text-3xl font-bold">Doraemon</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {mode === "in" ? "Welcome back! Sign in to continue." : "Create an account to save your chats."}
+            {mode === "in"
+              ? "Welcome back! Sign in to continue."
+              : "Create an account to save your chats."}
           </p>
         </div>
         <div className="mt-6 space-y-2">
@@ -122,7 +137,12 @@ function AuthPage() {
         </form>
         <p className="mt-5 text-center text-sm text-muted-foreground">
           {mode === "in" ? "New here? " : "Already have an account? "}
-          <Button variant="link" type="button" onClick={() => setMode(mode === "in" ? "up" : "in")} className="h-auto p-0 font-semibold text-bell">
+          <Button
+            variant="link"
+            type="button"
+            onClick={() => setMode(mode === "in" ? "up" : "in")}
+            className="h-auto p-0 font-semibold text-bell"
+          >
             {mode === "in" ? "Create account" : "Sign in"}
           </Button>
         </p>

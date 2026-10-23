@@ -5,13 +5,16 @@ export function useVoiceReadout() {
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  useEffect(() => () => {
-    if (utteranceRef.current) {
-      utteranceRef.current.onend = null;
-      utteranceRef.current.onerror = null;
-      window.speechSynthesis?.cancel();
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      if (utteranceRef.current) {
+        utteranceRef.current.onend = null;
+        utteranceRef.current.onerror = null;
+        window.speechSynthesis?.cancel();
+      }
+    },
+    [],
+  );
 
   function read(id: string, text: string) {
     if (!("speechSynthesis" in window)) {

@@ -4,7 +4,20 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { History, LogOut, Menu, Mic, MicOff, Plus, SquarePen, Trash2, ArrowUp, Paperclip, Volume2, Square } from "lucide-react";
+import {
+  History,
+  LogOut,
+  Menu,
+  Mic,
+  MicOff,
+  Plus,
+  SquarePen,
+  Trash2,
+  ArrowUp,
+  Paperclip,
+  Volume2,
+  Square,
+} from "lucide-react";
 
 import face from "@/assets/doraemon-face.png";
 import body from "@/assets/doraemon-body.png";
@@ -12,7 +25,11 @@ import { Button } from "@/components/ui/button";
 import { useVoiceReadout } from "@/hooks/use-voice-readout";
 import { supabase } from "@/integrations/supabase/client";
 import { createThread, deleteThread, getThreadMessages, listThreads } from "@/lib/chat.functions";
-import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import {
   PromptInput,
@@ -93,53 +110,154 @@ function ChatPage() {
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden">
       {/* Watermark */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden>
+      <div
+        className="pointer-events-none absolute inset-0 flex items-center justify-center"
+        aria-hidden
+      >
         <img src={face} alt="" className="watermark w-[110vmin] max-w-[820px]" />
       </div>
 
       <header className="glass-strong relative z-10 flex items-center justify-between border-x-0 border-t-0 px-4 py-3">
         <Link to="/" className="flex items-center gap-3">
-          <img src={body} alt="Doraemon" width={1024} height={1024} className="size-12 rounded-lg object-contain" />
+          <img
+            src={body}
+            alt="Doraemon"
+            width={1024}
+            height={1024}
+            className="size-12 rounded-lg object-contain"
+          />
           <span className="font-display text-xl font-semibold">Doraemon</span>
         </Link>
-        <Button variant="ghost" size="icon" aria-label="Open menu" title="Open menu" onClick={() => setHistoryOpen(true)} className="size-11 rounded-full text-foreground [&_svg]:size-6">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Open menu"
+          title="Open menu"
+          onClick={() => setHistoryOpen(true)}
+          className="size-11 rounded-full text-foreground [&_svg]:size-6"
+        >
           <Menu />
         </Button>
       </header>
 
       <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
-        <SheetContent side="right" aria-describedby={undefined} className="glass-strong flex w-[min(340px,88vw)] flex-col border-l p-5">
+        <SheetContent
+          side="right"
+          aria-describedby={undefined}
+          className="glass-strong flex w-[min(340px,88vw)] flex-col border-l p-5"
+        >
           <SheetHeader className="text-left">
             <SheetTitle className="flex items-center gap-3 font-display text-xl">
-              <img src={body} alt="" loading="lazy" width={1024} height={1024} className="size-12 rounded-lg object-contain" /> Doraemon
+              <img
+                src={body}
+                alt=""
+                loading="lazy"
+                width={1024}
+                height={1024}
+                className="size-12 rounded-lg object-contain"
+              />{" "}
+              Doraemon
             </SheetTitle>
           </SheetHeader>
           <div className="mt-6 space-y-2">
-            <Button onClick={newChat} className="bg-send h-12 w-full justify-start rounded-lg px-4 font-semibold"><SquarePen /> New Chat</Button>
-            <Button variant="ghost" onClick={() => setShowHistory((value) => !value)} aria-expanded={showHistory} className="h-12 w-full justify-start rounded-lg px-4"><History /> Chat History</Button>
+            <Button
+              onClick={newChat}
+              className="bg-send h-12 w-full justify-start rounded-lg px-4 font-semibold"
+            >
+              <SquarePen /> New Chat
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setShowHistory((value) => !value)}
+              aria-expanded={showHistory}
+              className="h-12 w-full justify-start rounded-lg px-4"
+            >
+              <History /> Chat History
+            </Button>
           </div>
           <nav aria-label="Chat history" className="min-h-0 flex-1 space-y-1 overflow-y-auto">
-            {showHistory && (threads.isPending ? <p className="px-4 py-3 text-sm text-muted-foreground">Loading chats…</p> : threads.isError ? <p className="px-4 py-3 text-sm text-collar">Couldn't load chats.</p> : threads.data?.length === 0 ? <p className="px-4 py-3 text-sm text-muted-foreground">No chats yet.</p> : threads.data?.map((t) => (
-              <div key={t.id} className={cn("group flex items-center rounded-lg hover:bg-accent", t.id === threadId && "bg-accent")}>
-                <Link to="/chat/$threadId" params={{ threadId: t.id }} onClick={() => setHistoryOpen(false)} className="min-w-0 flex-1 truncate px-4 py-3 text-sm">{t.title}</Link>
-                <Button variant="ghost" size="icon-sm" aria-label="Delete chat" title="Delete chat" onClick={() => removeThread(t.id).catch((error: Error) => toast.error(error.message))} className="mr-1 text-muted-foreground hover:text-collar"><Trash2 /></Button>
-              </div>
-            )))}
+            {showHistory &&
+              (threads.isPending ? (
+                <p className="px-4 py-3 text-sm text-muted-foreground">Loading chats…</p>
+              ) : threads.isError ? (
+                <p className="px-4 py-3 text-sm text-collar">Couldn't load chats.</p>
+              ) : threads.data?.length === 0 ? (
+                <p className="px-4 py-3 text-sm text-muted-foreground">No chats yet.</p>
+              ) : (
+                threads.data?.map((t) => (
+                  <div
+                    key={t.id}
+                    className={cn(
+                      "group flex items-center rounded-lg hover:bg-accent",
+                      t.id === threadId && "bg-accent",
+                    )}
+                  >
+                    <Link
+                      to="/chat/$threadId"
+                      params={{ threadId: t.id }}
+                      onClick={() => setHistoryOpen(false)}
+                      className="min-w-0 flex-1 truncate px-4 py-3 text-sm"
+                    >
+                      {t.title}
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Delete chat"
+                      title="Delete chat"
+                      onClick={() =>
+                        removeThread(t.id).catch((error: Error) => toast.error(error.message))
+                      }
+                      className="mr-1 text-muted-foreground hover:text-collar"
+                    >
+                      <Trash2 />
+                    </Button>
+                  </div>
+                ))
+              ))}
           </nav>
           <div className="mt-auto flex items-center gap-3 border-t border-glass-border pt-4">
-            <img src={body} alt="JIHAD avatar" loading="lazy" width={1024} height={1024} className="size-11 rounded-lg object-contain" />
+            <img
+              src={body}
+              alt="JIHAD avatar"
+              loading="lazy"
+              width={1024}
+              height={1024}
+              className="size-11 rounded-lg object-contain"
+            />
             <span className="flex-1 text-sm font-bold">JIHAD</span>
-            <Button variant="ghost" size="icon" aria-label="Sign out" title="Sign out" onClick={signOut} className="text-muted-foreground"><LogOut /></Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Sign out"
+              title="Sign out"
+              onClick={signOut}
+              className="text-muted-foreground"
+            >
+              <LogOut />
+            </Button>
           </div>
         </SheetContent>
       </Sheet>
 
-      {initial.found && <ChatWindow key={threadId} threadId={threadId} initialMessages={JSON.parse(initial.messages) as UIMessage[]} />}
+      {initial.found && (
+        <ChatWindow
+          key={threadId}
+          threadId={threadId}
+          initialMessages={JSON.parse(initial.messages) as UIMessage[]}
+        />
+      )}
     </div>
   );
 }
 
-function ChatWindow({ threadId, initialMessages }: { threadId: string; initialMessages: UIMessage[] }) {
+function ChatWindow({
+  threadId,
+  initialMessages,
+}: {
+  threadId: string;
+  initialMessages: UIMessage[];
+}) {
   const qc = useQueryClient();
   const transport = useMemo(
     () =>
@@ -164,8 +282,18 @@ function ChatWindow({ threadId, initialMessages }: { threadId: string; initialMe
   });
 
   const { speakingId, read } = useVoiceReadout();
-  const latestReply = [...messages].reverse().find((message) => message.role === "assistant" && message.parts.some((part) => part.type === "text" && part.text.trim()));
-  const latestReplyText = latestReply?.parts.filter((part) => part.type === "text").map((part) => part.text).join("\n") ?? "";
+  const latestReply = [...messages]
+    .reverse()
+    .find(
+      (message) =>
+        message.role === "assistant" &&
+        message.parts.some((part) => part.type === "text" && part.text.trim()),
+    );
+  const latestReplyText =
+    latestReply?.parts
+      .filter((part) => part.type === "text")
+      .map((part) => part.text)
+      .join("\n") ?? "";
 
   const busy = status === "submitted" || status === "streaming";
 
@@ -187,7 +315,15 @@ function ChatWindow({ threadId, initialMessages }: { threadId: string; initialMe
               <Message from={m.role} key={m.id}>
                 {m.role === "assistant" && (
                   <div className="flex items-center gap-2 text-xs font-semibold text-primary">
-                    <img src={body} alt="" loading="lazy" width={1024} height={1024} className="size-8 rounded object-contain" /> Doraemon
+                    <img
+                      src={body}
+                      alt=""
+                      loading="lazy"
+                      width={1024}
+                      height={1024}
+                      className="size-8 rounded object-contain"
+                    />{" "}
+                    Doraemon
                   </div>
                 )}
                 <MessageContent
@@ -202,26 +338,63 @@ function ChatWindow({ threadId, initialMessages }: { threadId: string; initialMe
                       return m.role === "assistant" ? (
                         <MessageResponse key={i}>{part.text}</MessageResponse>
                       ) : (
-                        <p key={i} className="whitespace-pre-wrap">{part.text}</p>
+                        <p key={i} className="whitespace-pre-wrap">
+                          {part.text}
+                        </p>
                       );
                     if (part.type === "file" && part.mediaType?.startsWith("image/"))
-                      return <img key={i} src={part.url} alt={part.filename ?? "attachment"} className="max-h-56 rounded-xl" />;
+                      return (
+                        <img
+                          key={i}
+                          src={part.url}
+                          alt={part.filename ?? "attachment"}
+                          className="max-h-56 rounded-xl"
+                        />
+                      );
                     if (part.type === "file")
-                      return <span key={i} className="text-xs text-muted-foreground">📎 {part.filename}</span>;
+                      return (
+                        <span key={i} className="text-xs text-muted-foreground">
+                          📎 {part.filename}
+                        </span>
+                      );
                     return null;
                   })}
                 </MessageContent>
-                {m.role === "assistant" && !busy && m.parts.some((part) => part.type === "text" && part.text.trim()) && (
-                  <Button variant="ghost" size="icon-sm" aria-label={speakingId === m.id ? "Stop readout" : "Read aloud"} title={speakingId === m.id ? "Stop readout" : "Read aloud"} onClick={() => read(m.id, m.parts.filter((part) => part.type === "text").map((part) => part.text).join("\n"))} className={cn("text-muted-foreground", speakingId === m.id && "text-bell")}>
-                    {speakingId === m.id ? <Square /> : <Volume2 />}
-                  </Button>
-                )}
+                {m.role === "assistant" &&
+                  !busy &&
+                  m.parts.some((part) => part.type === "text" && part.text.trim()) && (
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={speakingId === m.id ? "Stop readout" : "Read aloud"}
+                      title={speakingId === m.id ? "Stop readout" : "Read aloud"}
+                      onClick={() =>
+                        read(
+                          m.id,
+                          m.parts
+                            .filter((part) => part.type === "text")
+                            .map((part) => part.text)
+                            .join("\n"),
+                        )
+                      }
+                      className={cn("text-muted-foreground", speakingId === m.id && "text-bell")}
+                    >
+                      {speakingId === m.id ? <Square /> : <Volume2 />}
+                    </Button>
+                  )}
               </Message>
             ))
           )}
           {status === "submitted" && (
             <div className="flex items-center gap-2 text-sm">
-              <img src={body} alt="" loading="lazy" width={1024} height={1024} className="size-8 rounded object-contain motion-safe:animate-bounce" />
+              <img
+                src={body}
+                alt=""
+                loading="lazy"
+                width={1024}
+                height={1024}
+                className="size-8 rounded object-contain motion-safe:animate-bounce"
+              />
               <Shimmer>Doraemon is searching his pocket…</Shimmer>
             </div>
           )}
@@ -237,13 +410,31 @@ function ChatWindow({ threadId, initialMessages }: { threadId: string; initialMe
             multiple
             className="glass-strong rounded-[1.75rem] shadow-2xl [&_[data-slot=input-group]]:rounded-[1.75rem] [&_[data-slot=input-group]]:border-glass-border [&_[data-slot=input-group]]:bg-transparent"
           >
-            <PromptInputTextarea placeholder="Ask Doraemon anything..." autoFocus className="min-h-12 px-4 pt-3.5 text-[15px] placeholder:text-muted-foreground" />
+            <PromptInputTextarea
+              placeholder="Ask Doraemon anything..."
+              autoFocus
+              className="min-h-12 px-4 pt-3.5 text-[15px] placeholder:text-muted-foreground"
+            />
             <PromptInputFooter className="px-2 pb-2">
               <PromptInputTools>
                 <AttachButton />
               </PromptInputTools>
               <div className="flex items-center gap-1.5">
-                {latestReply && <PromptInputButton tooltip={speakingId === latestReply.id ? "Stop readout" : "Read latest reply aloud"} aria-label={speakingId === latestReply.id ? "Stop readout" : "Read latest reply aloud"} disabled={busy} onClick={() => read(latestReply.id, latestReplyText)} className="size-10 rounded-full text-muted-foreground">{speakingId === latestReply.id ? <Square /> : <Volume2 />}</PromptInputButton>}
+                {latestReply && (
+                  <PromptInputButton
+                    tooltip={
+                      speakingId === latestReply.id ? "Stop readout" : "Read latest reply aloud"
+                    }
+                    aria-label={
+                      speakingId === latestReply.id ? "Stop readout" : "Read latest reply aloud"
+                    }
+                    disabled={busy}
+                    onClick={() => read(latestReply.id, latestReplyText)}
+                    className="size-10 rounded-full text-muted-foreground"
+                  >
+                    {speakingId === latestReply.id ? <Square /> : <Volume2 />}
+                  </PromptInputButton>
+                )}
                 <VoiceButton />
                 <PromptInputSubmit
                   status={status}
@@ -299,22 +490,28 @@ function VoiceButton() {
   const recRef = useRef<SpeechRec | null>(null);
   const baseRef = useRef("");
 
-  useEffect(() => () => {
-    const rec = recRef.current;
-    if (rec) {
-      rec.onresult = () => {};
-      rec.onend = () => {};
-      rec.onerror = () => {};
-      rec.stop();
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      const rec = recRef.current;
+      if (rec) {
+        rec.onresult = () => {};
+        rec.onend = () => {};
+        rec.onerror = () => {};
+        rec.stop();
+      }
+    },
+    [],
+  );
 
   function toggle() {
     if (listening) {
       recRef.current?.stop();
       return;
     }
-    const W = window as unknown as { SpeechRecognition?: new () => SpeechRec; webkitSpeechRecognition?: new () => SpeechRec };
+    const W = window as unknown as {
+      SpeechRecognition?: new () => SpeechRec;
+      webkitSpeechRecognition?: new () => SpeechRec;
+    };
     const Ctor = W.SpeechRecognition ?? W.webkitSpeechRecognition;
     if (!Ctor) {
       toast.error("Voice input isn't supported in this browser.");
@@ -350,7 +547,10 @@ function VoiceButton() {
       tooltip={listening ? "Stop voice input" : "Voice input"}
       aria-label={listening ? "Stop voice input" : "Voice input"}
       onClick={toggle}
-      className={cn("size-10 rounded-full text-foreground/80 hover:text-bell", listening && "bg-collar text-destructive-foreground motion-safe:animate-pulse")}
+      className={cn(
+        "size-10 rounded-full text-foreground/80 hover:text-bell",
+        listening && "bg-collar text-destructive-foreground motion-safe:animate-pulse",
+      )}
     >
       {listening ? <MicOff className="size-5" /> : <Mic className="size-5" />}
     </PromptInputButton>
@@ -360,9 +560,17 @@ function VoiceButton() {
 function EmptyState({ onPick }: { onPick: (t: string) => void }) {
   return (
     <div className="flex flex-col items-center pt-10 text-center">
-      <img src={body} alt="Doraemon" width={1024} height={1024} className="size-28 rounded-lg object-contain" />
+      <img
+        src={body}
+        alt="Doraemon"
+        width={1024}
+        height={1024}
+        className="size-28 rounded-lg object-contain"
+      />
       <h2 className="mt-4 font-display text-3xl font-bold">Hi, I'm Doraemon!</h2>
-      <p className="mt-2 max-w-xs text-sm text-muted-foreground">What can I pull out of my 4D pocket for you today?</p>
+      <p className="mt-2 max-w-xs text-sm text-muted-foreground">
+        What can I pull out of my 4D pocket for you today?
+      </p>
       <div className="mt-6 grid w-full max-w-md grid-cols-1 gap-2 sm:grid-cols-2">
         {SUGGESTIONS.map((s) => (
           <Button

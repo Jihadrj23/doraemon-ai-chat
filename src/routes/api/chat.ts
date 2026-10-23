@@ -68,6 +68,7 @@ export const Route = createFileRoute("/api/chat")({
 
         const response = result.toUIMessageStreamResponse({
           originalMessages: messages,
+          generateMessageId: () => crypto.randomUUID(),
           sendReasoning: true,
           onFinish: async ({ responseMessage }) => {
             const { error } = await sb.from("messages").upsert(
